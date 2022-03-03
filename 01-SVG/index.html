@@ -55,10 +55,10 @@
 
   <h2>Prenez la première lettre de votre prénom que vous avez créée ci-dessus. Faite bouger une forme de votre choix le
     long de la lettre</h2>
-  <svg width="700" height="500">
-    <path fill="none" stroke="red"  d="M 30,5 l 25,0 -10,0 0,75 c 0,15 -30,15 -30,-10" id="theMotionPath"/>
+  <svg width="700" height="600">
+    <path transform="translate(0,15)" fill="none" stroke="red"  d="M 30,5 l 25,0 -10,0 0,75 c 0,15 -30,15 -30,-10" id="theMotionPath"/>
     
-    <circle cx="" cy="" r="10" fill="purple">
+    <circle cx="" cy="" r="10" fill="purple" transform="translate(0,15)">
       <animateMotion dur="6s" repeatCount="indefinite">
         <mpath xlink:href="#theMotionPath" />
       </animateMotion>
