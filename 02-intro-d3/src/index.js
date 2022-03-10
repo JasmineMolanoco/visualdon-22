@@ -66,7 +66,6 @@ circle3.on("click", () => {
 
 //Création d'un groupe pour notre histogramme de rectangles selon les hauteurs ci-dessous
 const data = [20, 5, 25, 8, 15]
-const x1= 10;
 
 const myDiv = d3.select(".my-div")
         .append("svg")
