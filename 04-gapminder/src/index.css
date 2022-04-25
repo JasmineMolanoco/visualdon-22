@@ -1,24 +1,59 @@
 *{
-    font-family: Arial, Helvetica, sans-serif
+  font-family: Arial, Helvetica, sans-serif
 }
 
 body{
-    width: 96vw;
-    height: 96vw;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
+  width: 96vw;
+  height: 100vw;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
 }
 
 
 #graph-stat-country{
-    width: 90vw;
-    height: 90vh;
+  width: 90vw;
+  height: 90vh;
 }
 
 #separateur{
-    font-weight: bold;
+  font-weight: bold;
+}
+
+.button {
+  color: white;
+  padding: 5px 15px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  border-radius: 50px;
+}
+
+.play {
+  background-color: white; 
+  color: black; 
+  border: 2px solid #4CAF50;
+}
+
+.play:hover {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.stop {
+  background-color: white; 
+  color: black; 
+  border: 2px solid #008CBA;
+}
+
+.stop:hover {
+  background-color: #008CBA;
+  color: white;
 }

@@ -1,4 +1,5 @@
 import * as d3 from 'd3'
+import { count } from 'd3'
 import allpib from '../data/income_per_person_gdppercapita_ppp_inflation_adjusted.csv' //PIB par habitant par pays et pour chaque année depuis 1800
 import lifeEsper from '../data/life_expectancy_years.csv' //espérance de vie par pays et pour chaque année depuis 1800
 import population from '../data/population_total.csv' //population depuis 1800 par pays 
@@ -6,7 +7,7 @@ import "./index.css"
 
 //------------------------------------------------------------------------------
 
-//Modifier les data du nbPopulation de 2021, pour les rendre exploitables
+//Modifier les data du nbPopulation, pour les rendre exploitables
 
 population.forEach(pays => {
     (Object.keys(pays)).forEach(key => {
@@ -16,25 +17,30 @@ population.forEach(pays => {
     })
 })
 
-//Modifier les data du PIB de 2021, pour les rendre exploitables
+//Modifier les data du PIB, pour les rendre exploitables
 let nbPib
 allpib.forEach(pays => {
-    if (typeof pays[2021] == 'string') {
-        nbPib = strToInt(pays[2021])
-        pays[2021] = nbPib
-    }
+    (Object.keys(pays)).forEach(key => {
+        if(typeof pays[key] == 'string' && key != 'country'){
+            nbPib = strToInt(pays[key])
+            pays[key] = nbPib
+        }
+    })  
 })
 
-//chercher les data les plus récentes pour les pays qui n'ont pas d'info en 2021
+//chercher les data les plus récentes pour les pays qui n'ont pas d'info (Ici ce n'est pas la bonne méthode...)
 lifeEsper.forEach(pays => {
-    if (pays[2021] == null) {
-        let i = 2021
-        do {
-            i--
-        } while (pays[i] == null);
-        console.log('en année ', i, 'le pib de', pays['country'], 'était de', pays[i])
-        pays[2021] = pays[i]
-    }
+    (Object.keys(pays)).forEach(key => {
+        if (pays[key] == null) {
+//-----------------------------------------------------------------------------------------            
+            // let i = key
+            // do{
+            //     i--
+            // }while (pays(i) == null);
+            // pays[key] = pays[i]
+//----------------------------------------------------------------------------------------- 
+        }
+    })
 })
 
 //ajouter au body une div qui sera parent du svg, la rendre reconnaissable 
@@ -44,7 +50,8 @@ d3.select("body")
 
 //modifier la taille en fonction de la largeur de la fenêtre
 let wDiv = document.querySelector("#graph-stat-country").offsetWidth
-let hDiv = document.querySelector("#graph-stat-country").offsetHeight
+// let hDiv = document.querySelector("#graph-stat-country").offsetHeight
+let hDiv = 600;
 
 //------------------------------------------------------------------------------
 
@@ -193,13 +200,105 @@ svg.append('g')
 
 //---------------------------------------------------------------------------------------------
 
+//Animation de la map 
+
+//---------------------------------------------------------------------------------------------
+
+//Event listener 
+document.querySelector('.play').addEventListener("click", animate)
+document.querySelector(".stop").addEventListener("click", stop);
+
+//ajout de la 1ère date description
+d3.select('#paragraphe').text('2021')
+
+//---------------------------------------------------------------------------------------------
+
+//Reconnaître l'interval 
+let nIntervId
+
+//pouvoir relancer/reparamétrer l'interval
+function animate() {
+    // regarder si l'interval a déjà été démarré
+    if (!nIntervId) {
+        //Fonction qui appelle une fonction entrée en paramètre tout les x temps
+        nIntervId = setInterval(play, 500);
+    }
+}
+
+//---------------------------------------------------------------------------------------------
+
+//Création tab data year, pour la description de l'année
+let counter = 0;
+let yearTxt = []
+lifeEsper.forEach(country => {
+    if (lifeEsper[0] == country) {
+        Object.keys(country).forEach(year => {
+            if (year !== "country" && year <= 2021)
+                yearTxt[counter] = year
+            counter++
+        })
+    }
+
+})
+
+//---------------------------------------------------------------------------------------------
+
+let i = 0;
+function play() {
+    // Recommence si à la fin du tableau
+    if (i == yearTxt.length - 1) {
+        i = 0;
+    } else {
+        i++;
+    }
+
+    // Mise à jour de la date description
+    d3.select('#paragraphe').text(yearTxt[i])
+    //Mise à jour des cercles. (Ici ce n'est pas la bonne méthode. Visiblement pas de join lors d'une animation ?...)
+    updateChart(yearTxt[i]);
+}
+
+//---------------------------------------------------------------------------------------------
+
+//Afin de stopper l'animation 
+function stop() {
+    //utilisation d'une méthode JS, nécessite l'id de l'interval
+    clearInterval(nIntervId);
+    nIntervId = null;
+}
+
+//---------------------------------------------------------------------------------------------
+
+function updateChart(iteration) {
+    svg.selectAll('circle')
+        .data(allpib)
+        .join(enter => enter.append('circle'))  
+            .attr('cx', function (d) { return x(d[iteration])})
+            .data(lifeEsper)
+            .join()
+            .attr('cy', function (d) { return y(d[iteration])}).transition(d3.transition()
+                .duration(500)
+                .ease(d3.easeLinear))
+            .data(population).join()
+            .attr("r", function (d) { return sqrtScale(d[iteration])}),
+            update => update.transition(d3.transition()
+                .duration(500)
+                .ease(d3.easeLinear))
+                .attr("r", function (d) { return sqrtScale(d[iteration]) }),
+            exit => exit.remove() 
+}
+
+console.log(population)
+//---------------------------------------------------------------------------------------------
+
+//Map choroplète
 d3.select("body").append("h3")
     .attr('id', 'separateur')
     .text("Let's give a look of l'espérance de vie sur une map choroplète...")
 
 //---------------------------------------------------------------------------------------------
 
-//Ajout div - marges - svg
+//Ajout div - marges - svg 
 d3.select("body").append("Mapdiv")
     .attr("id", "map")
 
@@ -275,13 +374,12 @@ d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/w
         .on("mouseover", mouseOver)
         .on("mouseleave", mouseLeave)
 })
-
 //---------------------------------------------------------------------------------------------
 
 //Fonction gestion des hover
 let mouseOver = function (d) {
     d3.selectAll(".Country")
-    //modification de valeur de l'attribut file de tous les pays
+        //modification de valeur de l'attribut file de tous les pays
         .transition()
         //temps que prennent les pays pour baisser en opacité
         .duration(200)
